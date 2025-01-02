@@ -1,77 +1,108 @@
 # DeepSeek PHP API Client
 
-This is a PHP API client for DeepSeek, allowing you to interact with the DeepSeek API. This client is designed to be easy to use and integrate into your PHP applications.
+A lightweight PHP wrapper for the DeepSeek Chat API.
+
+## Requirements
+
+- PHP 8.1+
+- Guzzle HTTP Client
+- Valid DeepSeek API key
 
 ## Installation
 
-You can install the DeepSeek PHP API client via Composer. Run the following command:
-
 ```bash
-composer require githubnext/deepseek-client
+composer require jpcaparas/deepseek-php-client
 ```
 
 ## Usage
 
-First, you need to create an instance of the `DeepSeekClient` class with your API key:
+### Basic Example
 
 ```php
 require 'vendor/autoload.php';
 
 use DeepSeek\DeepSeekClient;
 
-$apiKey = 'your_api_key';
-$client = new DeepSeekClient($apiKey);
-```
+$client = new DeepSeekClient('your-api-key');
 
-### Get Something
+$response = $client
+    ->setMessage('user', 'What is 2+2?')
+    ->send();
 
-To retrieve a resource by its ID, use the `getSomething` method:
-
-```php
-$id = 1;
-$response = $client->getSomething($id);
 print_r($response);
 ```
 
-### Create Something
-
-To create a new resource, use the `createSomething` method:
+### Available Methods
 
 ```php
-$data = ['name' => 'New Resource'];
-$response = $client->createSomething($data);
-print_r($response);
+// Initialize client
+$client = new DeepSeekClient('your-api-key');
+
+// Add a message to the conversation
+$client->setMessage('system', 'You are a helpful assistant');
+$client->setMessage('user', 'Hello'); // Returns self for chaining
+
+// Clear conversation history
+$client->clearMessages(); // Returns self for chaining
+
+// Send conversation to API (returns array)
+$response = $client->send();
 ```
 
-### Update Something
+### Response Format
 
-To update an existing resource, use the `updateSomething` method:
+A successful response will have this structure:
+
+Abridged:
 
 ```php
-$id = 1;
-$data = ['name' => 'Updated Resource'];
-$response = $client->updateSomething($id, $data);
-print_r($response);
+[
+    'choices' => [
+        ['message' => ['content' => 'Response text here']]
+    ]
+]
 ```
 
-### Delete Something
-
-To delete a resource by its ID, use the `deleteSomething` method:
+Full:
 
 ```php
-$id = 1;
-$response = $client->deleteSomething($id);
-print_r($response);
+[
+    "id" => "d7b42b8b-5007-42c6-b607-7b3b7b7b7b7b",
+    "object" => "chat.completion",
+    "created" => 1735810490,
+    "model" => "deepseek-chat",
+    "choices" => [
+      [
+        "index" => 0,
+        "message" => [
+          "role" => "assistant",
+          "content" => "Hello! How can I assist you today? 😊",
+        ],
+        "logprobs" => null,
+        "finish_reason" => "stop",
+      ],
+    ],
+    "usage" => [
+      "prompt_tokens" => 9,
+      "completion_tokens" => 11,
+      "total_tokens" => 20,
+      "prompt_cache_hit_tokens" => 0,
+      "prompt_cache_miss_tokens" => 9,
+    ],
+    "system_fingerprint" => "d7b42b8b-5007-42c6-b607-7b3b7b7b7b7b",
+  ]
+  ```
+
+### Error Handling
+
+```php
+try {
+    $response = $client
+        ->setMessage('user', 'Hello')
+        ->send();
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}
 ```
 
-## Running Tests
-
-To run the tests, use the following command:
-
-```bash
-composer test
-```
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The client will return the error response from the API if available, otherwise throw an exception.
