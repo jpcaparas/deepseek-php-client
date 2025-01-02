@@ -25,5 +25,8 @@
         "psr-4": {
             "DeepSeek\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }

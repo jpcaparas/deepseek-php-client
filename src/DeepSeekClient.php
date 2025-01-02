@@ -9,19 +9,24 @@ class DeepSeekClient
 {
     private Client $client;
     private string $apiKey;
+    private array $messages = [];
 
     public function __construct($apiKey)
     {
         $this->client = new Client([
-            'base_uri' => 'https://api.deepseek.com/v1/',
-            'timeout'  => 2.0,
+            'base_uri' => 'https://api.deepseek.com/',
+            'timeout'  => 30.0,
         ]);
+
         $this->apiKey = $apiKey;
     }
 
     private function request($method, $uri, $options = [])
     {
-        $options['headers']['Authorization'] = 'Bearer ' . $this->apiKey;
+        $options['headers'] = [
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json'
+        ];
 
         try {
             $response = $this->client->request($method, $uri, $options);
@@ -34,23 +39,31 @@ class DeepSeekClient
         }
     }
 
-    public function getSomething($id)
+    public function setMessage(string $role, string $content): self
     {
-        return $this->request('GET', "something/{$id}");
+        $this->messages[] = [
+            'role' => $role,
+            'content' => $content
+        ];
+        return $this;
     }
 
-    public function createSomething($data)
+    public function clearMessages(): self
     {
-        return $this->request('POST', 'something', ['json' => $data]);
+        $this->messages = [];
+        return $this;
     }
 
-    public function updateSomething($id, $data)
+    public function send(): array
     {
-        return $this->request('PUT', "something/{$id}", ['json' => $data]);
-    }
+        $payload = [
+            'model' => 'deepseek-chat',
+            'messages' => $this->messages,
+            'stream' => false
+        ];
 
-    public function deleteSomething($id)
-    {
-        return $this->request('DELETE', "something/{$id}");
+        return $this->request('POST', 'chat/completions', [
+            'json' => $payload
+        ]);
     }
 }

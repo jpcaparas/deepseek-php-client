@@ -23,7 +23,6 @@ class DeepSeekClientTest extends TestCase
         $handlerStack = HandlerStack::create($this->mockHandler);
         $this->mockClient = new Client(['handler' => $handlerStack]);
         
-        // Create a ReflectionClass to inject mock client
         $this->client = new DeepSeekClient('test-api-key');
         $reflection = new \ReflectionClass($this->client);
         $property = $reflection->getProperty('client');
@@ -31,78 +30,65 @@ class DeepSeekClientTest extends TestCase
         $property->setValue($this->client, $this->mockClient);
     }
 
-    public function testGetSomething()
+    public function testSetMessage()
     {
-        $expectedResponse = ['id' => 1, 'name' => 'test'];
-        $this->mockHandler->append(
-            new Response(200, [], json_encode($expectedResponse))
-        );
-
-        $response = $this->client->getSomething(1);
-        $this->assertEquals($expectedResponse, $response);
+        $this->client->setMessage('user', 'Hello');
+        
+        $reflection = new \ReflectionClass($this->client);
+        $property = $reflection->getProperty('messages');
+        $property->setAccessible(true);
+        
+        $messages = $property->getValue($this->client);
+        $this->assertEquals([
+            ['role' => 'user', 'content' => 'Hello']
+        ], $messages);
     }
 
-    public function testCreateSomething()
+    public function testClearMessages()
     {
-        $data = ['name' => 'test'];
-        $expectedResponse = ['id' => 1, 'name' => 'test'];
-        $this->mockHandler->append(
-            new Response(201, [], json_encode($expectedResponse))
-        );
-
-        $response = $this->client->createSomething($data);
-        $this->assertEquals($expectedResponse, $response);
+        $this->client->setMessage('user', 'Hello');
+        $this->client->clearMessages();
+        
+        $reflection = new \ReflectionClass($this->client);
+        $property = $reflection->getProperty('messages');
+        $property->setAccessible(true);
+        
+        $messages = $property->getValue($this->client);
+        $this->assertEquals([], $messages);
     }
 
-    public function testUpdateSomething()
+    public function testSend()
     {
-        $data = ['name' => 'updated'];
-        $expectedResponse = ['id' => 1, 'name' => 'updated'];
-        $this->mockHandler->append(
-            new Response(200, [], json_encode($expectedResponse))
-        );
-
-        $response = $this->client->updateSomething(1, $data);
-        $this->assertEquals($expectedResponse, $response);
-    }
-
-    public function testDeleteSomething()
-    {
-        $expectedResponse = ['status' => 'deleted'];
-        $this->mockHandler->append(
-            new Response(200, [], json_encode($expectedResponse))
-        );
-
-        $response = $this->client->deleteSomething(1);
-        $this->assertEquals($expectedResponse, $response);
-    }
-
-    public function testRequestWithError()
-    {
-        $errorResponse = ['error' => 'Not found'];
-        $this->mockHandler->append(
-            new RequestException(
-                'Not Found',
-                new Request('GET', 'something/1'),
-                new Response(404, [], json_encode($errorResponse))
-            )
-        );
-
-        $response = $this->client->getSomething(1);
-        $this->assertEquals($errorResponse, $response);
-    }
-
-    public function testRequestWithErrorNoResponse()
-    {
-        $this->expectException(RequestException::class);
+        $expectedResponse = [
+            'choices' => [
+                ['message' => ['content' => 'Hello there!']]
+            ]
+        ];
         
         $this->mockHandler->append(
+            new Response(200, [], json_encode($expectedResponse))
+        );
+
+        $this->client->setMessage('user', 'Hello');
+        $response = $this->client->send();
+        
+        $this->assertEquals($expectedResponse, $response);
+    }
+
+    public function testSendWithError()
+    {
+        $errorResponse = ['error' => 'Invalid request'];
+        $this->mockHandler->append(
             new RequestException(
-                'Network error',
-                new Request('GET', 'something/1')
+                'Bad Request',
+                new Request('POST', 'chat/completions'),
+                new Response(400, [], json_encode($errorResponse))
             )
         );
 
-        $this->client->getSomething(1);
+        $this->client->setMessage('user', 'Hello');
+        $response = $this->client->send();
+        
+        $this->assertEquals($errorResponse, $response);
     }
 }
