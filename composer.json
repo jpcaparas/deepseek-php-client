@@ -1,0 +1,29 @@
+{
+    "name": "jpcaparas/deepseek-php-client",
+    "description": "PHP client for DeepSeek AI API",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "JP Caparas",
+            "email": "jp@jpcaparas.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DeepSeek\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DeepSeek\\Tests\\": "tests/"
+        }
+    }
+}
