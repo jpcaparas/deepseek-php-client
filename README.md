@@ -18,6 +18,8 @@ composer require jpcaparas/deepseek-php-client
 
 ### Basic Example
 
+*(You can also use PsySH for interactive testing)*
+
 ```php
 require 'vendor/autoload.php';
 
