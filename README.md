@@ -108,3 +108,13 @@ try {
 ```
 
 The client will return the error response from the API if available, otherwise throw an exception.
+
+## Testing
+
+```bash
+composer test
+```
+
+## License
+
+MIT
