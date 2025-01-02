@@ -2,6 +2,8 @@
 
 A lightweight PHP wrapper for the DeepSeek Chat API.
 
+![Tests](https://github.com/jpcaparas/deepseek-php-client/actions/workflows/tests.yml/badge.svg)
+
 ## Requirements
 
 - PHP 8.1+
