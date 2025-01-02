@@ -1,6 +1,5 @@
 {
     "name": "jpcaparas/deepseek-php-client",
-    "version": "0.1.0",
     "description": "PHP client for DeepSeek AI API",
     "type": "library",
     "license": "MIT",
